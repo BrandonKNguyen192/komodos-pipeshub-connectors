@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Commerce7 ↔ PipesHub AI Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 40px 24px; }
+
+  h1 { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; color: #f8fafc; }
+  .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 40px; }
+
+  /* ── TOP ROW: Commerce7 → Connector ── */
+  .row { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: nowrap; margin-bottom: 0; }
+
+  .box {
+    background: #1e2330;
+    border: 1.5px solid #334155;
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 160px;
+    text-align: center;
+  }
+  .box .label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 6px; }
+  .box .name  { font-size: 0.95rem; font-weight: 700; color: #f1f5f9; }
+  .box .sub   { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; line-height: 1.4; }
+  .box.highlight { border-color: #6366f1; background: #1a1d2e; }
+  .box.green  { border-color: #22c55e; }
+  .box.orange { border-color: #f97316; }
+  .box.blue   { border-color: #38bdf8; }
+  .box.purple { border-color: #a855f7; }
+  .box.teal   { border-color: #14b8a6; }
+
+  .arrow {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 6px; min-width: 70px;
+  }
+  .arrow .line {
+    width: 100%; height: 2px; background: #334155; position: relative;
+  }
+  .arrow .line::after {
+    content: ''; position: absolute; right: -1px; top: -4px;
+    border: 5px solid transparent; border-left-color: #334155;
+  }
+  .arrow .alabel { font-size: 0.62rem; color: #64748b; margin-top: 5px; text-align: center; white-space: nowrap; }
+
+  /* vertical arrow */
+  .varrow { display: flex; flex-direction: column; align-items: center; padding: 4px 0; }
+  .varrow .vline { width: 2px; height: 32px; background: #334155; position: relative; }
+  .varrow .vline::after {
+    content: ''; position: absolute; bottom: -1px; left: -4px;
+    border: 5px solid transparent; border-top-color: #334155;
+  }
+  .varrow .alabel { font-size: 0.62rem; color: #64748b; margin-top: 4px; }
+
+  /* ── SECTION LABELS ── */
+  .section { text-align: center; margin: 28px 0 14px; }
+  .section h2 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #475569; display: inline-block; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
+
+  /* ── PIPELINE ROW ── */
+  .pipeline { display: flex; align-items: stretch; justify-content: center; gap: 0; flex-wrap: nowrap; }
+  .pipe-step {
+    background: #1e2330; border: 1.5px solid #334155; border-radius: 10px;
+    padding: 14px 16px; min-width: 130px; text-align: center;
+  }
+  .pipe-step .icon { font-size: 1.4rem; margin-bottom: 6px; }
+  .pipe-step .name { font-size: 0.82rem; font-weight: 700; color: #f1f5f9; }
+  .pipe-step .sub  { font-size: 0.68rem; color: #94a3b8; margin-top: 3px; line-height: 1.35; }
+  .pipe-step.blue  { border-color: #38bdf8; }
+  .pipe-step.green { border-color: #22c55e; }
+  .pipe-step.purple{ border-color: #a855f7; }
+  .pipe-step.teal  { border-color: #14b8a6; }
+  .pipe-step.orange{ border-color: #f97316; }
+
+  .pipe-arrow { display: flex; align-items: center; padding: 0 4px; }
+  .pipe-arrow svg { width: 28px; height: 14px; }
+
+  /* ── STORAGE GRID ── */
+  .storage-grid { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .store-card {
+    background: #1a1d2e; border-radius: 12px; border: 1.5px solid;
+    padding: 16px 20px; min-width: 170px; text-align: center;
+  }
+  .store-card .icon { font-size: 1.6rem; margin-bottom: 8px; }
+  .store-card .name { font-size: 0.88rem; font-weight: 700; }
+  .store-card .tech { font-size: 0.7rem; color: #94a3b8; margin-top: 3px; }
+  .store-card .desc { font-size: 0.68rem; color: #64748b; margin-top: 6px; line-height: 1.4; }
+
+  /* ── SYNC TIMELINE ── */
+  .timeline { max-width: 760px; margin: 0 auto; }
+  .t-row { display: flex; gap: 16px; margin-bottom: 10px; align-items: flex-start; }
+  .t-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .t-content .t-title { font-size: 0.82rem; font-weight: 700; color: #f1f5f9; }
+  .t-content .t-detail { font-size: 0.72rem; color: #94a3b8; margin-top: 2px; line-height: 1.45; }
+
+  /* ── RESOURCE TYPES ── */
+  .resources { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .resource-chip {
+    background: #1e2330; border: 1.5px solid #334155; border-radius: 20px;
+    padding: 6px 14px; font-size: 0.75rem; font-weight: 600; color: #94a3b8;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .resource-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* divider */
+  .divider { width: 100%; height: 1px; background: #1e293b; margin: 36px 0; }
+
+  .center { text-align: center; }
+  .badge { display: inline-block; background: #1e2330; border: 1px solid #334155; border-radius: 6px; padding: 3px 10px; font-size: 0.7rem; color: #94a3b8; margin: 3px; }
+</style>
+</head>
+<body>
+
+<h1>Commerce7 ↔ PipesHub AI</h1>
+<p class="subtitle">Connector Architecture &amp; Data Flow</p>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — High-Level Data Flow
+══════════════════════════════════════════ -->
+<div class="section"><h2>High-Level Data Flow</h2></div>
+
+<div class="row">
+  <div class="box orange">
+    <div class="label">Source</div>
+    <div class="name">Commerce7</div>
+    <div class="sub">REST API v1<br>api.commerce7.com</div>
+  </div>
+
+  <div class="arrow">
+    <div class="line"></div>
+    <div class="alabel">Basic Auth<br>+ tenant header</div>
+  </div>
+
+  <div class="box highlight">
+    <div class="label">Connector</div>
+    <div class="name">Commerce7Connector</div>
+    <div class="sub">Python · PipesHub AI<br>Every 15 minutes</div>
+  </div>
+
+  <div class="arrow">
+    <div class="line"></div>
+    <div class="alabel">WebpageRecords<br>+ Permissions</div>
+  </div>
+
+  <div class="box blue">
+    <div class="label">Processor</div>
+    <div class="name">DataSourceEntities<br>Processor</div>
+    <div class="sub">Dedup · Upsert<br>Kafka events</div>
+  </div>
+
+  <div class="arrow">
+    <div class="line"></div>
+    <div class="alabel">Embeddings<br>+ Indexing</div>
+  </div>
+
+  <div class="box green">
+    <div class="label">AI Layer</div>
+    <div class="name">PipesHub AI<br>Search Engine</div>
+    <div class="sub">Semantic search<br>Chat / Q&amp;A</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — Sync Pipeline (step-by-step)
+══════════════════════════════════════════ -->
+<div class="divider"></div>
+<div class="section"><h2>Sync Pipeline (Step by Step)</h2></div>
+
+<div class="pipeline">
+
+  <div class="pipe-step orange">
+    <div class="icon">⏰</div>
+    <div class="name">Scheduler</div>
+    <div class="sub">Fires every<br>15 minutes<br><em>or manual</em></div>
+  </div>
+
+  <div class="pipe-arrow">
+    <svg viewBox="0 0 28 14"><path d="M0 7h22M16 2l6 5-6 5" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <div class="pipe-step blue">
+    <div class="icon">🔐</div>
+    <div class="name">init()</div>
+    <div class="sub">Reads creds<br>from Etcd<br>App ID · Secret · Tenant</div>
+  </div>
+
+  <div class="pipe-arrow">
+    <svg viewBox="0 0 28 14"><path d="M0 7h22M16 2l6 5-6 5" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <div class="pipe-step teal">
+    <div class="icon">🌐</div>
+    <div class="name">API Fetch</div>
+    <div class="sub">Cursor-based<br>pagination<br>No rate limit</div>
+  </div>
+
+  <div class="pipe-arrow">
+    <svg viewBox="0 0 28 14"><path d="M0 7h22M16 2l6 5-6 5" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <div class="pipe-step purple">
+    <div class="icon">🔄</div>
+    <div class="name">Transform</div>
+    <div class="sub">→ WebpageRecord<br>Markdown content<br>updatedAt as rev ID</div>
+  </div>
+
+  <div class="pipe-arrow">
+    <svg viewBox="0 0 28 14"><path d="M0 7h22M16 2l6 5-6 5" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <div class="pipe-step green">
+    <div class="icon">💾</div>
+    <div class="name">Upsert</div>
+    <div class="sub">ArangoDB<br>Dedup by rev ID<br>Kafka → Qdrant</div>
+  </div>
+
+  <div class="pipe-arrow">
+    <svg viewBox="0 0 28 14"><path d="M0 7h22M16 2l6 5-6 5" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <div class="pipe-step blue">
+    <div class="icon">🔍</div>
+    <div class="name">AI Index</div>
+    <div class="sub">Embeddings<br>Vector search<br>Chat-ready</div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — Storage Layer
+══════════════════════════════════════════ -->
+<div class="divider"></div>
+<div class="section"><h2>Storage &amp; Infrastructure</h2></div>
+
+<div class="storage-grid">
+
+  <div class="store-card" style="border-color:#f97316">
+    <div class="icon">🗄️</div>
+    <div class="name" style="color:#fb923c">Etcd</div>
+    <div class="tech">Encrypted key-value store</div>
+    <div class="desc">Stores connector credentials (App ID, Secret Key, Tenant ID) — never in plaintext</div>
+  </div>
+
+  <div class="store-card" style="border-color:#38bdf8">
+    <div class="icon">🕸️</div>
+    <div class="name" style="color:#38bdf8">ArangoDB</div>
+    <div class="tech">Graph database</div>
+    <div class="desc">Stores record metadata, RecordGroups, permission edges, and SyncPoints for delta tracking</div>
+  </div>
+
+  <div class="store-card" style="border-color:#a855f7">
+    <div class="icon">🧠</div>
+    <div class="name" style="color:#c084fc">Qdrant</div>
+    <div class="tech">Vector database</div>
+    <div class="desc">Stores AI embeddings for semantic search and natural-language Q&amp;A over Commerce7 data</div>
+  </div>
+
+  <div class="store-card" style="border-color:#22c55e">
+    <div class="icon">📨</div>
+    <div class="name" style="color:#4ade80">Kafka</div>
+    <div class="tech">Message bus</div>
+    <div class="desc">Publishes sync-events and record-events; triggers downstream indexing pipeline asynchronously</div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — Resource Types
+══════════════════════════════════════════ -->
+<div class="divider"></div>
+<div class="section"><h2>Commerce7 Resource Types Synced</h2></div>
+
+<div class="resources">
+  <div class="resource-chip"><span class="dot" style="background:#f97316"></span>Customers</div>
+  <div class="resource-chip"><span class="dot" style="background:#38bdf8"></span>Orders</div>
+  <div class="resource-chip"><span class="dot" style="background:#a855f7"></span>Products</div>
+  <div class="resource-chip"><span class="dot" style="background:#22c55e"></span>Clubs</div>
+  <div class="resource-chip"><span class="dot" style="background:#ec4899"></span>Club Memberships</div>
+  <div class="resource-chip"><span class="dot" style="background:#eab308"></span>Reservations</div>
+  <div class="resource-chip"><span class="dot" style="background:#14b8a6"></span>Inventory</div>
+</div>
+<p class="center" style="margin-top:12px;font-size:0.72rem;color:#475569">Each resource type becomes a <strong style="color:#94a3b8">RecordGroup</strong> in ArangoDB · Individual items become <strong style="color:#94a3b8">WebpageRecords</strong></p>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — Sync Strategy
+══════════════════════════════════════════ -->
+<div class="divider"></div>
+<div class="section"><h2>Sync Strategy</h2></div>
+
+<div class="timeline">
+
+  <div class="t-row">
+    <div class="t-dot" style="background:#f97316;margin-top:5px"></div>
+    <div class="t-content">
+      <div class="t-title">Scheduled Sync — every 15 minutes</div>
+      <div class="t-detail">The scheduler fires <code>run_sync()</code>. All enabled resource types are fetched in full from Commerce7 using cursor-based pagination (no rate limit). Commerce7 lacks a native delta/changelog endpoint, so a full re-fetch is always done.</div>
+    </div>
+  </div>
+
+  <div class="t-row">
+    <div class="t-dot" style="background:#38bdf8;margin-top:5px"></div>
+    <div class="t-content">
+      <div class="t-title">Smart Deduplication via updatedAt</div>
+      <div class="t-detail">Each record's <code>updatedAt</code> timestamp is stored as the <code>external_revision_id</code>. <code>DataSourceEntitiesProcessor</code> compares this on upsert — if unchanged, the record is skipped, saving compute and avoiding unnecessary re-embedding.</div>
+    </div>
+  </div>
+
+  <div class="t-row">
+    <div class="t-dot" style="background:#a855f7;margin-top:5px"></div>
+    <div class="t-content">
+      <div class="t-title">Webhook Support (real-time)</div>
+      <div class="t-detail">Commerce7 webhooks can trigger <code>handle_webhook_notification()</code> on Customer, Order, or Product create/update/delete events — enabling near-real-time sync without waiting for the next 15-minute window.</div>
+    </div>
+  </div>
+
+  <div class="t-row">
+    <div class="t-dot" style="background:#22c55e;margin-top:5px"></div>
+    <div class="t-content">
+      <div class="t-title">SyncPoint Tracking</div>
+      <div class="t-detail">After each resource type syncs, a <code>SyncPoint</code> is saved in ArangoDB with a timestamp and record count — giving you a full audit trail of every sync run.</div>
+    </div>
+  </div>
+
+  <div class="t-row">
+    <div class="t-dot" style="background:#eab308;margin-top:5px"></div>
+    <div class="t-content">
+      <div class="t-title">Permissions</div>
+      <div class="t-detail">All synced records get an org-wide <code>READER</code> permission — every user in your PipesHub AI org can search and query Commerce7 data. No per-user permission mapping needed since Commerce7 is B2B SaaS.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — Key Files
+══════════════════════════════════════════ -->
+<div class="divider"></div>
+<div class="section"><h2>Key Files in the Codebase</h2></div>
+
+<div style="max-width:760px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+
+  <div style="background:#1e2330;border:1.5px solid #334155;border-radius:10px;padding:14px 16px">
+    <div style="font-size:0.7rem;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">REST Client</div>
+    <code style="font-size:0.7rem;color:#94a3b8">sources/client/commerce7/commerce7.py</code>
+    <p style="font-size:0.7rem;color:#64748b;margin-top:6px">Raw HTTP client · Basic Auth · cursor pagination · all 7 resource endpoints</p>
+  </div>
+
+  <div style="background:#1e2330;border:1.5px solid #334155;border-radius:10px;padding:14px 16px">
+    <div style="font-size:0.7rem;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Connector</div>
+    <code style="font-size:0.7rem;color:#94a3b8">connectors/sources/commerce7/connector.py</code>
+    <p style="font-size:0.7rem;color:#64748b;margin-top:6px">Extends BaseConnector · 11 abstract methods · sync logic · Markdown rendering</p>
+  </div>
+
+  <div style="background:#1e2330;border:1.5px solid #334155;border-radius:10px;padding:14px 16px">
+    <div style="font-size:0.7rem;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">App Definition</div>
+    <code style="font-size:0.7rem;color:#94a3b8">connectors/sources/commerce7/common/apps.py</code>
+    <p style="font-size:0.7rem;color:#64748b;margin-top:6px">Binds connector to Connectors.COMMERCE7 + AppGroups.COMMERCE7 enum values</p>
+  </div>
+
+  <div style="background:#1e2330;border:1.5px solid #334155;border-radius:10px;padding:14px 16px">
+    <div style="font-size:0.7rem;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Registration</div>
+    <code style="font-size:0.7rem;color:#94a3b8">connectors/core/factory/connector_factory.py</code>
+    <p style="font-size:0.7rem;color:#64748b;margin-top:6px">"commerce7" key → Commerce7Connector in _connector_registry</p>
+  </div>
+
+  <div style="background:#1e2330;border:1.5px solid #334155;border-radius:10px;padding:14px 16px">
+    <div style="font-size:0.7rem;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Enum Constants</div>
+    <code style="font-size:0.7rem;color:#94a3b8">config/constants/arangodb.py</code>
+    <p style="font-size:0.7rem;color:#64748b;margin-top:6px">COMMERCE7 added to Connectors + AppGroups enums</p>
+  </div>
+
+  <div style="background:#1e2330;border:1.5px solid #334155;border-radius:10px;padding:14px 16px">
+    <div style="font-size:0.7rem;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Icon</div>
+    <code style="font-size:0.7rem;color:#94a3b8">frontend/public/assets/icons/connectors/commerce7.svg</code>
+    <p style="font-size:0.7rem;color:#64748b;margin-top:6px">Komodos-branded SVG shown in the PipesHub AI connector UI</p>
+  </div>
+
+</div>
+
+<div style="height:40px"></div>
+
+</body>
+</html>
