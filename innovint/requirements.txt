@@ -1,0 +1,9 @@
+# InnoVint Connector — Python dependencies
+#
+# This connector runs inside PipesHub's Python backend via the ConnectorFactory.
+# PipesHub core already provides: aioarangodb, aiokafka, aioetcd3, and the
+# full PipesHub SDK (BaseConnector, DataSourceEntitiesProcessor, SyncPoint, etc.)
+#
+# The only additional dependency this connector needs is:
+
+aiohttp>=3.9.0,<4.0.0

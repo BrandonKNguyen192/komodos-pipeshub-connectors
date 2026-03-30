@@ -1,0 +1,35 @@
+# Docker Compose for running the InnoVint connector alongside PipesHub
+# This is meant to be used as an extension to PipesHub's main docker-compose.yml
+
+version: "3.8"
+
+services:
+  innovint-connector:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: pipeshub-innovint-connector
+    restart: unless-stopped
+    env_file:
+      - ../config/.env
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - HEALTH_CHECK_PORT=8085
+      - LOG_LEVEL=INFO
+    ports:
+      - "8085:8085"
+    networks:
+      - pipeshub-network
+    depends_on:
+      - kafka
+      - mongodb
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8085/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  pipeshub-network:
+    external: true
+    name: pipeshub_default
